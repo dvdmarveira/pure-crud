@@ -72,6 +72,27 @@ func Create(writer http.ResponseWriter, request *http.Request) {
 	writer.WriteHeader(http.StatusCreated)
 }
 
+func Update(writer http.ResponseWriter, request *http.Request) {
+
+}
+
+func Delete(writer http.ResponseWriter, request *http.Request) {
+	if request.Method != "DELETE" {
+		http.Error(writer, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
+		return
+	}
+
+	id := request.URL.Query().Get("id")
+
+	_, err := db.Exec("DELETE FROM users WHERE id=$1", id)
+	if err != nil {
+		fmt.Println("Server failed to handle", err)
+		return
+	}
+
+	writer.WriteHeader(http.StatusOK)
+}
+
 var db *sql.DB
 
 func init() {
@@ -92,5 +113,9 @@ func init() {
 func main() {
 	http.HandleFunc("/users", Read)
 	http.HandleFunc("/users/create", Create)
+	http.HandleFunc("/users/update", Update)
+	http.HandleFunc("/users/delete", Delete)
+	// http.HandleFunc("/users/{id}", Update)
+	// http.HandleFunc("/users/{id}", Delete)
 	http.ListenAndServe(":8585", nil)
 }

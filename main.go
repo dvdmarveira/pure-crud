@@ -2,18 +2,44 @@ package main
 
 import (
 	"database/sql"
+	"encoding/json"
 	"fmt"
 	"net/http"
 
 	_ "github.com/lib/pq"
 )
 
-func Read(writer http.ResponseWriter, response *http.Request) {
+type User struct {
+	ID int
+	Name string
+	Email string
+	Age int
+}
+
+func Read(writer http.ResponseWriter, request *http.Request) {
 
 }
 
-func Create(writer http.ResponseWriter, response *http.Request) {
+func Create(writer http.ResponseWriter, request *http.Request) {
+	if request.Method != "POST" {
+		http.Error(writer, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
+		return
+	}
 
+	user := User{}
+	err := json.NewDecoder(request.Body).Decode(&user)
+	if err != nil {
+		fmt.Println("Server failed to handle", err)
+		return
+	}
+
+	_, err = db.Exec("INSERT INTO users (name, email, age) VALUES ($1, $2, $3)", user.Name, user.Email, user.Age)
+	if err != nil {
+		fmt.Println("Server failed to handle", err)
+		return
+	}
+
+	writer.WriteHeader(http.StatusCreated)
 }
 
 var db *sql.DB

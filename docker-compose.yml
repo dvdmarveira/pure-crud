@@ -1,0 +1,36 @@
+services:
+  postgres:
+    image: postgres:latest
+    container_name: postgres_database
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=2513
+      - POSTGRES_DB=crudgo
+    ports:
+      - '5432:5432'
+    volumes:
+      - database_postgres:/var/lib/postgresql/data
+    networks:
+      - crudgo 
+  
+  app:
+    container_name: app
+    build:
+      context: .
+      dockerfile: Dockerfile 
+    ports: 
+      - 8585:8585
+    restart: on-failure
+    volumes:
+      - api:/usr/src/app
+    depends_on:
+      - postgres 
+    networks: 
+      - crudgo 
+
+volumes:
+  api: 
+  database_postgres:
+
+networks:
+  crudgo:
